@@ -11,7 +11,7 @@
 | created | time | タイムスタンプ |
 | updated | time | 更新日
 | comment | text | コメント本文 | 
-| priority | bool | trueの場合優先度が高い |
+| pin | bool | ピン留めをするか |
 
 # Trafck
 服薬やイベントなどのその時々の記録を行う
