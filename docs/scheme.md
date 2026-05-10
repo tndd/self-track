@@ -8,14 +8,6 @@
 | -- | -- | -- |
 | id | uuid | 各日付のid |
 | condition | int | 0を基準に-2 ~ 2。高いほど良い |
-
-## day_comment
-dayには複数のコメントがつき得る
-
-| name | type | description |
-| -- | -- | -- |
-| id | uuid | -- |
-| day_id | uuid | dayのid |
 | created | time | タイムスタンプ |
 | updated | time | 更新日
 | comment | text | コメント本文 | 
