@@ -48,18 +48,26 @@ dayには複数のコメントがつき得る
 | condition | int | 基本を0として-2 ~ 2の間の数値 |
 
 ## tag_group
+タグたちのグループの集まり。
+一つのtagに対して複数のidが集まる。
+
 | name | type | description |
 | -- | -- | -- |
 | id | uuid | -- |
-| name | uuid | どのtagに属する農家のid
+| name | uuid | どのtagに属する農家のid |
+| created | time | 記録日 |
+| updated | time | 更新日時 |
 
 # Sleep
+睡眠はぶつ切りの可能性を考慮し下職となっている、
+複数存在しうるがday_idに紐ついている、
 
 ## log
 | name | type | description |
 | -- | -- | -- |
 | id | uuid | -- |
 | day_id | uuid | dayのid |
-| created | time | タイムスタンプ |
+| created | time | 記録日 |
+| updated | time | 更新日時 |
 | start | 開始日時 | 睡眠開始　|
 | end | 終了時間 | 起床時刻 |
