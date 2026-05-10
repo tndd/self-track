@@ -1,96 +1,45 @@
 # API Interface
 
-DBのスキーマ（`docs/scheme.md`）は正規化されていますが、実際のAPIはフロントエンドでの利用を想定し、これらをJoinしたネスト構造のデータを提供します。
+DBのスキーマ（`docs/scheme.md`）は正規化されていますが、実際のAPIはフロントエンドの「3つのタブ（Track, Daily, Sleep）」それぞれの画面構成で扱いやすい形に最適化して提供します。
 
-## 1. Calendar / Day
+## 1. Track (Track Tab)
 
-### `GET /api/calendar`
-カレンダー画面（月間表示など）のためのAPI。指定した期間（月など）の `day` データと、紐づく重要な情報をJoinして取得します。
+時々の出来事（イベント）の記録や、そのタイムライン表示のためのAPIです。
+
+### `GET /api/tracks`
+Trackタブでのタイムライン一覧表示用API。指定期間のイベントとそれに紐づくタグを取得します。
 
 **Query Parameters:**
-- `year`: int
-- `month`: int
+- `start_date`: YYYY-MM-DD
+- `end_date`: YYYY-MM-DD
 
 **Response:**
 ```json
 [
   {
-    "id": "uuid",             // day.id
-    "date": "2026-05-11",     // カレンダーの日付
-    "condition": 1,           // day.condition
-    "priority_comments": [
-      // day_commentから priority=true のものをJoin
+    "id": "uuid",
+    "comment": "少し疲れてきた",
+    "condition": -1,
+    "priority": false,
+    "is_archived": false,
+    "created": "2026-05-11T14:00:00Z",
+    "tags": [
       {
         "id": "uuid",
-        "comment": "よく眠れた"
+        "tag_name": "頭痛",
+        "condition": -2,
+        "tag_group": {
+          "id": "uuid",
+          "name": "体調"
+        }
       }
-    ],
-    "sleep_summary": {
-      // 該当day_idに紐づくsleep logから算出
-      "total_hours": 7.5
-    }
+    ]
   }
 ]
 ```
 
-### `GET /api/days/:day_id`
-1日の詳細画面のためのAPI。`day`テーブルを起点に、`day_comment`、睡眠記録（`log`）、およびその日発生した `event`（とそれに紐づく `tag`）を全てJoinして返します。
-
-**Response:**
-```json
-{
-  "id": "uuid",             // day.id
-  "condition": 1,
-  "comments": [
-    // day_commentをJoin
-    {
-      "id": "uuid",
-      "comment": "今日は調子が良い",
-      "priority": true,
-      "created": "2026-05-11T10:00:00Z",
-      "updated": "2026-05-11T10:00:00Z"
-    }
-  ],
-  "sleep_logs": [
-    // sleep logをJoin
-    {
-      "id": "uuid",
-      "start": "2026-05-10T23:30:00Z",
-      "end": "2026-05-11T07:00:00Z",
-      "created": "2026-05-11T07:00:00Z",
-      "updated": "2026-05-11T07:00:00Z"
-    }
-  ],
-  "events": [
-    // その日に該当するeventをJoin (※eventテーブルに発生日時が含まれる想定)
-    {
-      "id": "uuid",
-      "comment": "朝の記録",
-      "condition": 2,
-      "is_archived": false,
-      "priority": false,
-      "created": "2026-05-11T09:00:00Z",
-      "tags": [
-        // tagとtag_groupをJoin
-        {
-          "id": "uuid",
-          "tag_name": "コーヒー",
-          "condition": 1,
-          "tag_group": {
-            "id": "uuid",
-            "name": "飲食"
-          }
-        }
-      ]
-    }
-  ]
-}
-```
-
-## 2. Track (Event & Tag)
-
-### `POST /api/events`
-3時間ごとの通知時や、任意のタイミングでのイベント記録を作成します。フロントエンドからはイベント情報とタグ情報を同時に送信し、バックエンドでトランザクションを貼って `event` と `tag` テーブルへインサートします。
+### `POST /api/tracks`
+イベント（時々の記録）を作成します。
 
 **Request Body:**
 ```json
@@ -108,40 +57,124 @@ DBのスキーマ（`docs/scheme.md`）は正規化されていますが、実�
 }
 ```
 
-### `GET /api/tag-groups`
-入力画面でタグをサジェストするために、タググループとそれに紐づくタグの履歴（ユニークな `tag_name` など）をまとめて取得します。
+### `GET /api/tags/groups`
+タグ入力時のサジェスト用一覧を取得します。
+
+---
+
+## 2. Daily (Daily Tab)
+
+日単位の記録（1日の全体コンディション、日記的コメント）のためのAPIです。
+他のリソース（TrackやSleep）とは分離し、Dailyタブ専用の情報のみを扱います。
+
+### `GET /api/daily`
+カレンダーや月間の一覧表示用API。
+
+**Query Parameters:**
+- `year`: int
+- `month`: int
 
 **Response:**
 ```json
 [
   {
-    "id": "uuid", // tag_group.id
-    "name": "体調",
-    "recent_tags": [
-      "頭痛",
-      "腹痛",
-      "肩こり"
+    "id": "uuid",             // day.id
+    "date": "2026-05-11",
+    "condition": 1,
+    "priority_comments": [
+      {
+        "id": "uuid",
+        "comment": "全体的に良い一日だった"
+      }
     ]
   }
 ]
 ```
 
-## 3. CRUD Operations
+### `GET /api/daily/:day_id`
+特定の一日の詳細（日記画面）を取得します。
 
-以下のエンドポイントは各エンティティの個別操作（作成・更新・削除）用です。
-子要素は関連する親のIDなどをURIに含めます。
+**Response:**
+```json
+{
+  "id": "uuid",
+  "date": "2026-05-11",
+  "condition": 1,
+  "comments": [
+    {
+      "id": "uuid",
+      "comment": "今日は調子が良い",
+      "priority": true,
+      "created": "2026-05-11T10:00:00Z",
+      "updated": "2026-05-11T10:00:00Z"
+    }
+  ]
+}
+```
 
-- **Day Comments**
-  - `POST /api/days/:day_id/comments`
-  - `PUT /api/comments/:comment_id`
-  - `DELETE /api/comments/:comment_id`
-- **Sleep Logs**
-  - `POST /api/days/:day_id/sleep-logs`
-  - `PUT /api/sleep-logs/:log_id`
-  - `DELETE /api/sleep-logs/:log_id`
-- **Events**
-  - `PUT /api/events/:event_id`
-  - `DELETE /api/events/:event_id`
-- **Tags**
-  - `POST /api/events/:event_id/tags`
+### `POST /api/daily/:day_id/comments`
+該当日の日記（コメント）を追加します。
+
+---
+
+## 3. Sleep (Sleep Tab)
+
+睡眠記録（本睡眠・昼寝）のためのAPIです。Dailyから切り離し、独立したリストとして管理します。
+
+### `GET /api/sleeps`
+Sleepタブでの睡眠記録の一覧表示用API。昼寝などもそれぞれ独立したレコードとして取得します。
+
+**Query Parameters:**
+- `start_date`: YYYY-MM-DD
+- `end_date`: YYYY-MM-DD
+
+**Response:**
+```json
+[
+  {
+    "id": "uuid",
+    "day_id": "uuid", // DB上は対象のdayに紐づく
+    "start": "2026-05-10T23:30:00Z",
+    "end": "2026-05-11T07:00:00Z",
+    "duration_hours": 7.5,
+    "created": "2026-05-11T07:00:00Z"
+  },
+  {
+    "id": "uuid",
+    "day_id": "uuid",
+    "start": "2026-05-11T13:00:00Z",
+    "end": "2026-05-11T14:30:00Z",
+    "duration_hours": 1.5,
+    "created": "2026-05-11T14:30:00Z"
+  }
+]
+```
+
+### `POST /api/sleeps`
+睡眠記録を追加します。
+
+**Request Body:**
+```json
+{
+  "day_id": "uuid",
+  "start": "2026-05-10T23:30:00Z",
+  "end": "2026-05-11T07:00:00Z"
+}
+```
+
+---
+
+## 4. CRUD Operations (個別リソース)
+
+詳細な更新・削除などは以下のエンドポイントで行います。
+
+- **Track (Events/Tags)**
+  - `PUT /api/tracks/:event_id`
+  - `DELETE /api/tracks/:event_id`
   - `DELETE /api/tags/:tag_id`
+- **Daily (Comments)**
+  - `PUT /api/daily/comments/:comment_id`
+  - `DELETE /api/daily/comments/:comment_id`
+- **Sleep**
+  - `PUT /api/sleeps/:sleep_id`
+  - `DELETE /api/sleeps/:sleep_id`
