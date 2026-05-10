@@ -65,7 +65,6 @@ Trackタブでのタイムライン一覧表示用API。指定期間のイベン
 ## 2. Daily (Daily Tab)
 
 日単位の記録（1日の全体コンディション、日記的コメント）のためのAPIです。
-他のリソース（TrackやSleep）とは分離し、Dailyタブ専用の情報のみを扱います。
 
 ### `GET /api/daily`
 カレンダーや月間の一覧表示用API。
@@ -85,22 +84,6 @@ Trackタブでのタイムライン一覧表示用API。指定期間のイベン
     "comment": "全体的に良い一日だった"
   }
 ]
-```
-
-### `GET /api/daily/:day_id`
-特定の一日の詳細（日記画面）を取得します。
-
-**Response:**
-```json
-{
-  "id": "uuid",
-  "date": "2026-05-11",
-  "condition": 1,
-  "comment": "今日は調子が良い",
-  "pin": true,
-  "created": "2026-05-11T10:00:00Z",
-  "updated": "2026-05-11T10:00:00Z"
-}
 ```
 
 ### `PUT /api/daily/:day_id`
