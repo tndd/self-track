@@ -7,7 +7,7 @@
 | name | type | description |
 | -- | -- | -- |
 | id | uuid | 各日付のid |
-| condition | int | 0を基準に-2 ~~ 2。高いほど良い |
+| condition | int | 0を基準に-2 ~ 2。高いほど良い |
 
 ## day_comment
 dayには複数のコメントがつき得る
