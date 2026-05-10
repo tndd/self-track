@@ -53,7 +53,6 @@ dayには複数のコメントがつき得る
 | id | uuid | -- |
 | name | uuid | どのtagに属する農家のid
 
-
 # Sleep
 
 ## log
