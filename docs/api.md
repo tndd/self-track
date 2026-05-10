@@ -81,12 +81,8 @@ Trackタブでのタイムライン一覧表示用API。指定期間のイベン
     "id": "uuid",             // day.id
     "date": "2026-05-11",
     "condition": 1,
-    "priority_comments": [
-      {
-        "id": "uuid",
-        "comment": "全体的に良い一日だった"
-      }
-    ]
+    "pin": true,
+    "comment": "全体的に良い一日だった"
   }
 ]
 ```
@@ -100,20 +96,15 @@ Trackタブでのタイムライン一覧表示用API。指定期間のイベン
   "id": "uuid",
   "date": "2026-05-11",
   "condition": 1,
-  "comments": [
-    {
-      "id": "uuid",
-      "comment": "今日は調子が良い",
-      "priority": true,
-      "created": "2026-05-11T10:00:00Z",
-      "updated": "2026-05-11T10:00:00Z"
-    }
-  ]
+  "comment": "今日は調子が良い",
+  "pin": true,
+  "created": "2026-05-11T10:00:00Z",
+  "updated": "2026-05-11T10:00:00Z"
 }
 ```
 
-### `POST /api/daily/:day_id/comments`
-該当日の日記（コメント）を追加します。
+### `PUT /api/daily/:day_id`
+該当日のコンディションや日記（コメント）、ピン留め状態を更新します。
 
 ---
 
@@ -174,9 +165,8 @@ Sleepタブでの睡眠記録の一覧表示用API。多相睡眠（昼寝など
   - `PUT /api/tracks/:event_id`
   - `DELETE /api/tracks/:event_id`
   - `DELETE /api/tags/:tag_id`
-- **Daily (Comments)**
-  - `PUT /api/daily/comments/:comment_id`
-  - `DELETE /api/daily/comments/:comment_id`
+- **Daily**
+  - `PUT /api/daily/:day_id` （コメントやコンディションの更新）
 - **Sleep**
   - `PUT /api/sleeps/:sleep_id`
   - `DELETE /api/sleeps/:sleep_id`
